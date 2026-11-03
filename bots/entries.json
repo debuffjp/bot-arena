@@ -1,0 +1,4 @@
+[
+  { "model": "reference:random", "lab": "reference", "attempt": 0, "file": "random.ts" },
+  { "model": "reference:greedy", "lab": "reference", "attempt": 0, "file": "greedy.ts" }
+]
