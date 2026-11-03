@@ -54,35 +54,33 @@ function runAgent(
   });
 }
 
-if (import.meta.main) {
-  const { values } = parseArgs({
-    options: {
-      models: { type: "string" },
-      out: { type: "string" },
-      attempts: { type: "string", default: "5" },
-      minutes: { type: "string" },
-    },
-  });
-  if (!values.models || !values.out) throw new Error("usage: write-bots.ts --models models.json --out work/<name>");
-  const root = resolve(import.meta.dirname, "..");
-  const specs = JSON.parse(readFileSync(values.models, "utf8")) as ModelSpec[];
-  const minutes = values.minutes ? Number(values.minutes) : undefined;
-  const entries: { model: string; lab: string; attempt: number; file: string }[] = [];
-  for (const spec of specs) {
-    for (let attempt = 0; attempt < Number(values.attempts); attempt++) {
-      const cwd = resolve(values.out, spec.model.replace(/\W+/g, "-"), String(attempt));
-      mkdirSync(join(cwd, "bot"), { recursive: true });
-      cpSync(join(root, "RULES.md"), join(cwd, "RULES.md"));
-      cpSync(join(root, "src/sim.ts"), join(cwd, "src/sim.ts"));
-      cpSync(join(root, "bots/random.ts"), join(cwd, "bots/random.ts"));
-      cpSync(join(root, "bots/greedy.ts"), join(cwd, "bots/greedy.ts"));
-      const run = await runAgent(spec, cwd, minutes, prompt(minutes));
-      const file = join(cwd, "bot/bot.ts");
-      console.log(
-        `${spec.model} #${attempt}: exit ${run.code}, ${run.seconds.toFixed(0)} s${run.timedOut ? ", timed out" : ""}${existsSync(file) ? "" : ", NO BOT"}`,
-      );
-      if (existsSync(file)) entries.push({ model: spec.model, lab: spec.lab, attempt, file });
-    }
+const { values } = parseArgs({
+  options: {
+    models: { type: "string" },
+    out: { type: "string" },
+    attempts: { type: "string", default: "5" },
+    minutes: { type: "string" },
+  },
+});
+if (!values.models || !values.out) throw new Error("usage: write-bots.ts --models models.json --out work/<name>");
+const root = resolve(import.meta.dirname, "..");
+const specs = JSON.parse(readFileSync(values.models, "utf8")) as ModelSpec[];
+const minutes = values.minutes ? Number(values.minutes) : undefined;
+const entries: { model: string; lab: string; attempt: number; file: string }[] = [];
+for (const spec of specs) {
+  for (let attempt = 0; attempt < Number(values.attempts); attempt++) {
+    const cwd = resolve(values.out, spec.model.replace(/\W+/g, "-"), String(attempt));
+    mkdirSync(join(cwd, "bot"), { recursive: true });
+    cpSync(join(root, "RULES.md"), join(cwd, "RULES.md"));
+    cpSync(join(root, "src/sim.ts"), join(cwd, "src/sim.ts"));
+    cpSync(join(root, "bots/random.ts"), join(cwd, "bots/random.ts"));
+    cpSync(join(root, "bots/greedy.ts"), join(cwd, "bots/greedy.ts"));
+    const run = await runAgent(spec, cwd, minutes, prompt(minutes));
+    const file = join(cwd, "bot/bot.ts");
+    console.log(
+      `${spec.model} #${attempt}: exit ${run.code}, ${run.seconds.toFixed(0)} s${run.timedOut ? ", timed out" : ""}${existsSync(file) ? "" : ", NO BOT"}`,
+    );
+    if (existsSync(file)) entries.push({ model: spec.model, lab: spec.lab, attempt, file });
   }
-  writeFileSync(resolve(values.out, "entries.json"), JSON.stringify(entries, null, 2));
 }
+writeFileSync(resolve(values.out, "entries.json"), JSON.stringify(entries, null, 2));
