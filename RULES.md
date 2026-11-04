@@ -16,7 +16,7 @@ Rollers start with mass 1, side 0 at (0, 0) and side 1 at (15, 15). After moving
 
 ## Collisions
 
-Rollers collide when they reach the same tile or swap tiles. With equal mass, both stay where they were. Otherwise the heavier roller takes the tile and the lighter one is squished: it returns home at mass 1 and sits out 8 turns.
+Rollers collide when they reach the same tile or swap tiles. A squished roller returns home at mass 1 and sits out 8 turns. With equal mass, both are squished. Otherwise the heavier roller takes the tile and the lighter one is squished.
 
 ## What a bot sees
 

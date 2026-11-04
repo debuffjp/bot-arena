@@ -29,7 +29,7 @@ export interface MatchState {
   rollers: readonly [Roller, Roller];
 }
 
-export type MatchEvent = { type: "squish"; winner: Side; x: number; y: number } | { type: "paint"; side: Side; x: number; y: number };
+export type MatchEvent = { type: "squish"; winner: Side | null; x: number; y: number } | { type: "paint"; side: Side; x: number; y: number };
 
 /** Everything a bot may see. Paint and the enemy outside SIGHT stay hidden. */
 export interface View {
@@ -133,9 +133,12 @@ export function step(state: MatchState, moves: readonly [Move, Move]): { state: 
     const swapped = next[0].x === b.x && next[0].y === b.y && next[1].x === a.x && next[1].y === a.y;
     if (sameTile || swapped) {
       if (a.mass === b.mass) {
-        // Equal rollers bounce: nobody moves, so a collision can never be forced by size alone.
-        Object.assign(next[0], { x: a.x, y: a.y });
-        Object.assign(next[1], { x: b.x, y: b.y });
+        // Equal rollers both go home: a bounce let two bots push against each other for the rest of a match.
+        events.push({ type: "squish", winner: null, x: next[0].x, y: next[0].y });
+        for (const side of [0, 1] as const) {
+          const [hx, hy] = HOME[side];
+          next[side] = { x: hx, y: hy, mass: 1, respawn: RESPAWN_TURNS };
+        }
       } else {
         const winner: Side = a.mass > b.mass ? 0 : 1;
         const loser = (1 - winner) as Side;

@@ -78,11 +78,21 @@ describe("splat rules", () => {
     expect(next.rollers[0].respawn).toBe(RESPAWN_TURNS);
   });
 
-  it("bounces equal rollers", () => {
+  it("squishes both equal rollers", () => {
     const state: MatchState = { ...open(), rollers: [at(4, 4, 3), at(6, 4, 3)] };
-    const { state: next } = step(state, ["E", "W"]);
-    expect(next.rollers[0]).toMatchObject({ x: 4, y: 4, respawn: 0 });
-    expect(next.rollers[1]).toMatchObject({ x: 6, y: 4, respawn: 0 });
+    const { state: next, events } = step(state, ["E", "W"]);
+    expect(next.rollers[0]).toMatchObject({ x: 0, y: 0, mass: 1, respawn: RESPAWN_TURNS });
+    expect(next.rollers[1]).toMatchObject({ x: SIZE - 1, y: SIZE - 1, mass: 1, respawn: RESPAWN_TURNS });
+    expect(events.some((e) => e.type === "squish" && e.winner === null)).toBe(true);
+  });
+
+  it("ends a push against a roller stuck at a wall", () => {
+    const walls = new Uint8Array(SIZE * SIZE);
+    walls[3 * SIZE + 13] = 1;
+    const state: MatchState = { ...open(), walls, rollers: [at(13, 4), at(13, 5)] };
+    const { state: next } = step(state, ["N", "N"]);
+    expect(next.rollers[0].respawn).toBe(RESPAWN_TURNS);
+    expect(next.rollers[1].respawn).toBe(RESPAWN_TURNS);
   });
 
   it("keeps a squished roller off the board until its respawn ends", () => {
