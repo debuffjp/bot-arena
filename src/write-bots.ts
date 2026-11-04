@@ -17,7 +17,9 @@ export interface ModelSpec {
 
 export const prompt = (minutes?: number) => `Write the strongest bot you can for the game in RULES.md.${minutes ? ` You have ${minutes} minutes.` : ""}
 
-Write it to bot/bot.ts as one file with no imports outside the Node standard library. src/sim.ts is the exact game, and you can use it to play your bot locally against bots/random.ts and bots/greedy.ts. Only bot/bot.ts is scored. You will face other strong bots on hidden maps.`;
+Write it to bot/bot.ts as one file with no imports outside the Node standard library. src/sim.ts is the exact game, and you can use it to play your bot locally against bots/random.ts and bots/greedy.ts. Only bot/bot.ts is scored. You will face other strong bots on hidden maps.
+
+Don't stop at your first working bot. Save each version, play new versions against earlier ones over many seeds, and keep improving until several rounds in a row stop finding gains.`;
 
 function runAgent(
   spec: ModelSpec,
